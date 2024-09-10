@@ -1,7 +1,7 @@
 import os
-import shutil
 import subprocess
 from pytube import Playlist, YouTube
+import yt_dlp
 
 def download_playlist(pl, hedef_klasor):
     
@@ -44,7 +44,7 @@ def download_playlist(pl, hedef_klasor):
     print("İndirme tamamlandı.")
 
 
-def download_singell(video_link, hedef_klasor):
+def download_single(video_link, hedef_klasor):
     yt = YouTube(video_link)
     video = yt.streams.filter(only_audio=True).first()
     default_filename = video.default_filename
@@ -56,15 +56,50 @@ def download_singell(video_link, hedef_klasor):
     os.rename(os.path.join(hedef_klasor, default_filename), yeni_dosya_yolu)
     print("İndirme tamamlandı.")
 
+
+
+def download_single2(video_link, hedef_klasor):
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': f'{hedef_klasor}/%(title)s.%(ext)s',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+    }
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        print(f"{video_link} indiriliyor...")
+        ydl.download([video_link])
+        print("İndirme tamamlandı.")
+
+def download_playlist2(playlist_url, hedef_klasor):
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': f'{hedef_klasor}/%(title)s.%(ext)s',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+    }
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        print(f"{playlist_url} çalma listesi indiriliyor...")
+        ydl.download([playlist_url])
+        print("İndirme tamamlandı.")
+
+
 if __name__ == "__main__":
     hedef_klasor = "./Downloads"
     secim = input("Lütfen indirme yöntemi seçin:\n0: Tekli\n1: Çalma Listesi\nSeçiminiz: ")
     
     if secim == "0":
         video_link = input("Lütfen indirmek istediğiniz video URL'sini girin: ")
-        download_singell(video_link, hedef_klasor)
+        download_single2(video_link, hedef_klasor)
     elif secim == "1":
         playlist_url = input("Lütfen indirmek istediğiniz çalma listesinin URL'sini girin: ")
-        download_playlist(playlist_url, hedef_klasor)
+        download_playlist2(playlist_url, hedef_klasor)
     else:
         print("Geçersiz seçim! Lütfen 0 veya 1 girin.")
